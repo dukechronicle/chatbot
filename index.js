@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var request = require('request');
 var app = express();
-var token_json = require("./access_token.json");
+//var token_json = require("./access_token.json");
 
 app.set('port', (process.env.PORT || 8000));
 
@@ -81,7 +81,7 @@ function webhook_callback (chron_json, sender, res) {
 //helper functions
 
 //facebook app token
-var token = token_json["token"];
+var token = process.env.token;//token_json["token"];
 
 function Card (title, subtitle, image_url, article_url) {
   this.title = title;
