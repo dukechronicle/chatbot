@@ -41,6 +41,9 @@ var json_response = {
   }
 }
 
+//main chron url
+var homeUrl = "http://www.dukechronicle.com/";
+
 //recieve and handle webhook post request
 app.post('/webhook/', function(req, res) {
 	messaging_events = req.body.entry[0].messaging;
@@ -48,21 +51,31 @@ app.post('/webhook/', function(req, res) {
 		event = req.body.entry[0].messaging[i];
 		sender = event.sender.id;
 		if (event.message && event.message.text) {
-      getTopStories(function (chron_json) {
-			if (chron_json) {
-        console.log("chron_json");
+      var searchStr = event.message.text.toLowerCase();
+      if (searchStr.includes("news")) {
+        getTopStories(homeUrl + "section/news", webhook_callback, sender, res);
+      } else if (searchStr.includes("sports")) {
+        getTopStories(homeUrl + "section/sports", webhook_callback, sender, res);
+      } else if (searchStr.includes("opinion")) {
+        getTopStories(homeUrl + "section/opinion", webhook_callback, sender, res);
       } else {
-        console.log("chron_json is null");
-      }
-
-      //text = decodeURIComponent(chron_json[0]['articles'][0]['headline']);
-      //text = finishDecode(text);
-			sendTextMessage(sender, chron_json[0]['articles']);
-      res.sendStatus(200); 
-      });
-		}
+        getTopStories(homeUrl, webhook_callback, sender, res);
+      }    
+    }
 	}
 });
+
+//webhook callback
+function webhook_callback (chron_json, sender, res) {
+	if (chron_json) {
+    console.log("chron_json");
+  } else {
+    console.log("chron_json is null");
+  }
+
+	sendTextMessage(sender, chron_json[0]['articles']);
+  res.sendStatus(200); 
+}
 
 
 //helper functions
@@ -121,12 +134,10 @@ function sendTextMessage(sender, items) {
 	})
 }
 
-//main chron url
-var homeUrl = "http://www.dukechronicle.com/";
 
 //return json of page one
-function getTopStories(callback) {
-  url = homeUrl + ".json"; 
+function getTopStories(stories_url, callback, sender, webhook_response) {
+  url = stories_url + ".json"; 
   var chron_json = "";
   request(url, function (error, response, body) {
             if (error) {
@@ -137,7 +148,7 @@ function getTopStories(callback) {
               chron_json = JSON.parse(body);
             }
 
-            callback(chron_json);
+            callback(chron_json, sender, webhook_response);
   });
    
 }
