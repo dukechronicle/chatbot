@@ -34,3 +34,6 @@ node_modules
 
 # access tokey
 access_token.json
+
+# yarn lockfile
+yarn.lock
